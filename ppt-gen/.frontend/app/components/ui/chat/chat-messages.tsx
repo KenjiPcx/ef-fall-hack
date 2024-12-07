@@ -1,10 +1,10 @@
 "use client";
 
 import { ChatMessage, ChatMessages, useChatUI } from "@llamaindex/chat-ui";
+import { useEffect } from "react";
 import { ChatMessageAvatar } from "./chat-avatar";
 import { ChatMessageContent } from "./chat-message-content";
 import { ChatStarter } from "./chat-starter";
-import { useEffect } from "react";
 
 export default function CustomChatMessages() {
   const { messages } = useChatUI();
@@ -12,7 +12,7 @@ export default function CustomChatMessages() {
   useEffect(() => {
     console.log(messages);
   }, [messages]);
-  
+
   return (
     <ChatMessages className="shadow-xl rounded-xl">
       <ChatMessages.List>

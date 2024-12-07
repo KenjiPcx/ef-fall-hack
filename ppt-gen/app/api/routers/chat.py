@@ -7,7 +7,7 @@ from app.api.routers.models import (
 )
 from app.api.routers.vercel_response import VercelStreamResponse
 from app.engine.query_filter import generate_filters
-from app.workflows import create_workflow
+from app.workflows.old_base_workflow import create_workflow
 
 chat_router = r = APIRouter()
 

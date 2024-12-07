@@ -9,6 +9,8 @@ from app.api.services.suggestion import NextQuestionSuggestion
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 
+from app.workflows.single import AgentRunEvent
+
 logger = logging.getLogger("uvicorn")
 
 
@@ -91,7 +93,7 @@ class VercelStreamResponse(StreamingResponse):
         # Yield the events from the event handler
         async def _event_generator():
             async for event in events:
-                event_response = event.to_response()
+                event_response = self._event_to_response(event)
                 if verbose:
                     logger.debug(event_response)
                 if event_response is not None:
@@ -100,6 +102,17 @@ class VercelStreamResponse(StreamingResponse):
         combine = stream.merge(_chat_response_generator(), _event_generator())
         return combine
 
+    @staticmethod
+    def _event_to_response(event: AgentRunEvent) -> dict:
+        return {
+            "type": "agent",
+            "data": {
+                "workflowName": event.workflow_name,
+                "agent": event.name,
+                "text": event.msg,
+            },
+        }
+        
     @classmethod
     def convert_text(cls, token: str):
         # Escape newlines and double quotes to avoid breaking the stream

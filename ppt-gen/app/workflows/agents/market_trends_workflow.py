@@ -41,7 +41,7 @@ def create_workflow(
     code_interpreter_tool = configured_tools.get("interpret")
     document_generator_tool = configured_tools.get("generate_document")
 
-    return FinancialReportWorkflow(
+    return ConsultingReportWorkflow(
         query_engine_tool=query_engine_tool,
         code_interpreter_tool=code_interpreter_tool,
         document_generator_tool=document_generator_tool,
@@ -66,7 +66,7 @@ class ReportEvent(Event):
     input: list[ToolSelection]
 
 
-class FinancialReportWorkflow(Workflow):
+class ConsultingReportWorkflow(Workflow):
     """
     A workflow to generate a financial report using indexed documents.
 
@@ -87,9 +87,42 @@ class FinancialReportWorkflow(Workflow):
     """
 
     _default_system_prompt = """
-    You are a financial analyst who are given a set of tools to help you.
-    It's good to using appropriate tools for the user request and always use the information from the tools, don't make up anything yourself.
-    For the query engine tool, you should break down the user request into a list of queries and call the tool with the queries.
+    # Role
+    You are a Senior Strategy Consultant tasked with answering queries about a knowledge base. Your responses should be comprehensive, insightful, and directly aligned with the uploaded content.
+
+    # Audience
+    Your audience is a Private Equity firm conducting a due diligence report. The response must be professional, detailed, and tailored to the context of their needs.
+
+    # Instructions
+    1. **Carefully analyze the query and uploaded content**
+    - Identify all relevant data, insights, and context in the knowledge base that pertain to the query
+
+    2. **Generate a detailed and well-structured response** (target: 300–500 words)
+    - Include specific examples, figures, and insights from the knowledge base to add depth
+    - Provide context and explanation to make the information valuable to the audience
+
+    3. **Ensure no relevant insight is omitted**
+    - Cross-check the content to ensure that all applicable data points, trends, and takeaways are included in your response
+
+    4. **Adhere strictly to the knowledge base content**
+    > **Important**: Do not add, interpret, or infer beyond the explicit information provided.
+    > If the query cannot be answered based on the uploaded content, write:
+    > "I could not find an accurate answer in my knowledge base."
+
+    5. **Structure your response clearly**
+    - Use headings, bullet points, and concise paragraphs to organize information effectively
+
+    # Output Format
+    Your response should follow this structure:
+
+    1. **Summary**
+    - Concise summary of the 'Detailed Analysis' (30-50 words)
+
+    2. **Detailed Analysis**
+    - Specific insights, examples, and figures in a detailed yet focused narrative (300 words)
+
+    3. **Other areas to explore**
+    - 1-3 related areas that the user could investigate next (50 words)
     """
 
     def __init__(
@@ -197,6 +230,7 @@ class FinancialReportWorkflow(Workflow):
         )
         tool_calls = ev.input
 
+        # Call all the individual slide agents in parallel
         tool_messages = await call_tools(
             ctx=ctx,
             agent_name="Researcher",
