@@ -10,7 +10,7 @@ import SendIcon from '@/icons/sendIcon';
 export default function IndexPage() {
   const { messages, input, handleSubmit, handleInputChange, isLoading } = useChat({
     api: `http://localhost:8000/api/chat`,
-    initialMessages: exampleMessages
+    initialMessages: []
   });
 
   const handleSubmitTextArea = (event: React.KeyboardEvent) => {
