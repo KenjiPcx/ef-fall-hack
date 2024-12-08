@@ -362,7 +362,6 @@ class ReportGenerationWorkflow(Workflow):
         """
         print(f"Combined report:\n{combined_report}")
         ctx.data["combined_report"] = combined_report
-        
         res_agent = FunctionCallingAgent(
             name="Executive Summarizer",
             tools=[],
@@ -375,8 +374,8 @@ class ReportGenerationWorkflow(Workflow):
             """),
         )
         
-        prompt = f"Your team has created individual content for different slides in a report. Render them together in markdown information:\n{combined_report}\nEach slide should have their own pictures, just make it look nice. You can find some initial research results here:\n{ctx.data.get('initial_research_results')}, use them to replace any missing images."
-        res = await self.run_agent(ctx, res_agent, prompt)
+        prompt = f"Your team has created individual content for different slides in a report. Render them together with proper formatting like with markdown headers, bold, italic etc. Here is the combined report:\n{combined_report}\nEach slide should have their own pictures, just make it look nice. You can find some initial research results here:\n{ctx.data.get('initial_research_results')}, use them to replace any missing images."
+        res = await self.run_agent(ctx, res_agent, prompt, True)
         
         return StopEvent(result=res)
 

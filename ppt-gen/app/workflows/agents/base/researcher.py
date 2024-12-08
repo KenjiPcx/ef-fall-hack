@@ -57,7 +57,7 @@ def create_researcher(
     )
 
     if additional_instructions:
-        base_prompt += f"\n\nAdditional Instructions:\n{additional_instructions}"
+        base_prompt += f"\n\nAdditional Instructions:\n{additional_instructions}. When searching for information, tune your query to be relevant to your specialized role."
 
     return FunctionCallingAgent(
         name="Researcher",
