@@ -1,5 +1,5 @@
 from textwrap import dedent
-from typing import List, Tuple, Dict
+from typing import List, Optional, Tuple, Dict
 
 from app.engine.tools import ToolFactory
 from app.engine.tools.interpreter import E2BCodeInterpreter
@@ -10,7 +10,7 @@ from llama_index.core.tools import FunctionTool
 
 def _get_analyst_params() -> Tuple[List[type[FunctionTool]], str, str]:
     tools = []
-    prompt_instructions = dedent(
+    base_prompt = dedent(
         """
         You are an expert in analyzing financial data.
         You are given a task and a set of financial data to analyze. Your task is to analyze the financial data and return a report.
@@ -26,23 +26,31 @@ def _get_analyst_params() -> Tuple[List[type[FunctionTool]], str, str]:
     configured_tools: Dict[str, FunctionTool] = ToolFactory.from_env(map_result=True)  # type: ignore
     print(f"Configured tools: {configured_tools}")
     code_interpreter_tool = configured_tools.get("interpret")
-    tools.append(code_interpreter_tool)
-    prompt_instructions += dedent("""
-            You are can use the interpreter tool to execute code, create charts and graphs.
+    if code_interpreter_tool:
+        tools.append(code_interpreter_tool)
+        base_prompt += dedent("""
+            You can use the interpreter tool to execute code, create charts and graphs.
             It's very useful to create and include visualizations to the report (make sure you include the right code and data for the visualization).
             Never include any code into the report, just the visualization.
         """)
-    description += ", able to visualize the financial data using code interpreter tool."
-    return tools, prompt_instructions, description
+        description += ", able to visualize the financial data using code interpreter tool."
+    return tools, base_prompt, description
 
 
-def create_analyst(chat_history: List[ChatMessage]):
-    tools, prompt_instructions, description = _get_analyst_params()
+def create_analyst(
+    chat_history: List[ChatMessage],
+    additional_instructions: Optional[str] = None,
+    **kwargs
+):
+    tools, base_prompt, description = _get_analyst_params()
+
+    if additional_instructions:
+        base_prompt += f"\n\nAdditional Instructions:\n{additional_instructions}"
 
     return FunctionCallingAgent(
         name="Analyst",
         tools=tools,
         description=description,
-        system_prompt=dedent(prompt_instructions),
-        chat_history=chat_history,
+        system_prompt=base_prompt,
+        chat_history=chat_history.copy(),
     )

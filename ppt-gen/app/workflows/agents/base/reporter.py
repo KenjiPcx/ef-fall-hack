@@ -1,18 +1,16 @@
 from textwrap import dedent
-from typing import List, Tuple
+from typing import List, Optional
 
-from app.engine.tools import ToolFactory
 from app.workflows.single import FunctionCallingAgent
 from llama_index.core.chat_engine.types import ChatMessage
-from llama_index.core.tools import BaseTool
 
 
-def _get_reporter_params(
+def create_reporter(
     chat_history: List[ChatMessage],
-) -> Tuple[List[type[BaseTool]], str, str]:
-    tools: List[type[BaseTool]] = []
-    description = "Expert in representing a financial report"
-    prompt_instructions = dedent(
+    additional_instructions: Optional[str] = None,
+    **kwargs
+):
+    base_prompt = dedent(
         """
         You are a Senior Strategy Consultant assistant that provides detailed, image-rich answers from a knowledge base.
 
@@ -46,52 +44,16 @@ def _get_reporter_params(
         - Cite sources using: [citation:node_id]()
         - For text-only nodes: "Source: [citation:node_id]()"
         - Include image sources when displaying images
-
-        # OUTPUT FORMAT
-        The part of your response should follow this structure:
-        *Length:* Provide text of about 400-500 words
-        *Comprehensive:* Cross-check the content to ensure that all applicable data points, trends, and takeaways are included in your response.
-        *Sentences:* Write sentences with dense, detail-rich content that includes precise information in every statement.Avoid generalized language or unnecessary words 
-        *Tone of voice:* Use clear and professional business language.Avoid language that conveys excitement, informality, or subjectivity.    
-
-        # EXAMPLE RESPONSE TO SHOW IMAGE GENERATION 
-
-        **Question:** *Tell me a fun fact about llamas.*  
-
-        Nodes: [5 nodes, with 5 different images]
-
-        ### **Most Relevant Information**  
-        - A baby llama is called a "Cria" [citation:xyz]().  
-        - Llamas are known for their soft, hypoallergenic wool [citation:abc]().  
-
-        ![Soft llama wool](path/to/llama.png)  
-
-        ### **Somewhat Relevant Information**  
-        - Llamas live in farms, often raised for their wool and as pack animals [citation:jkl]().  
-
-        ![Llamas on a farm](path/to/llama_in_farm.png)  
-
-        ### **Interesting Insights**  
-        - Llamas are loved worldwide for their friendly nature [citation:ghi]().  
-
-        * Only 2 images were available for this content.
-
-        ---# CONTEXT HANDLING
-        When providing answers based on context documents:
-        - Be conversational yet professional
-        - Include specific details from the provided context
-        - Maintain honesty - say "I don't know" when information isn't present
         """
     )
-    return tools, description, prompt_instructions
 
+    if additional_instructions:
+        base_prompt += f"\n\nAdditional Instructions:\n{additional_instructions}"
 
-def create_reporter(chat_history: List[ChatMessage]):
-    tools, description, prompt_instructions = _get_reporter_params(chat_history)
     return FunctionCallingAgent(
         name="Reporter",
-        tools=tools,
-        description=description,
-        system_prompt=prompt_instructions,
-        chat_history=chat_history,
+        tools=[],
+        description="expert in representing a financial report",
+        system_prompt=base_prompt,
+        chat_history=chat_history.copy(),
     )

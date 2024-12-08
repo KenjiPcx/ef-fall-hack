@@ -7,7 +7,7 @@ from app.api.routers.models import (
 )
 from app.api.routers.vercel_response import VercelStreamResponse
 from app.engine.query_filter import generate_filters
-from app.workflows.old_base_workflow import create_workflow
+from app.workflows.report_generation_workflow import create_report_generation_workflow
 
 chat_router = r = APIRouter()
 
@@ -28,7 +28,7 @@ async def chat(
         filters = generate_filters(doc_ids)
         params = data.data or {}
 
-        workflow = create_workflow(
+        workflow = create_report_generation_workflow(
             chat_history=messages,
             params=params,
             filters=filters,
