@@ -332,16 +332,53 @@ class ReportGenerationWorkflow(Workflow):
 
         # Combine all slides
         combined_report = f"""
-        Market Size: {ctx.data.get('market_size_result')}
-        Growth Drivers: {ctx.data.get('growth_drivers_result')}
-        Risks: {ctx.data.get('risks_result')}
-        M&A: {ctx.data.get('ma_result')}
-        Dynamics: {ctx.data.get('dynamics_result')}
-        Profiles: {ctx.data.get('profiles_result')}
-        """
+        ## Market Size: 
+        {ctx.data.get('market_size_result')}
         
+        ---
+        
+        ## Growth Drivers: 
+        {ctx.data.get('growth_drivers_result')}
+        
+        ---
+        
+        ## Risks: 
+        {ctx.data.get('risks_result')}
+        
+        ---
+        
+        ## M&A: 
+        {ctx.data.get('ma_result')}
+        
+        ---
+        
+        ## Dynamics: 
+        {ctx.data.get('dynamics_result')}
+        
+        ---
+        
+        ## Profiles: 
+        {ctx.data.get('profiles_result')}
+        """
+        print(f"Combined report:\n{combined_report}")
         ctx.data["combined_report"] = combined_report
-        return ReportEvent(input=f"Create a report from the following information:\n{combined_report}\nEach slide should have their own pictures, just make it look nice.")
+        
+        res_agent = FunctionCallingAgent(
+            name="Executive Summarizer",
+            tools=[],
+            description="Expert in summarizing a report",
+            system_prompt=dedent("""
+                You are an expert in displaying reports.
+                Your team will have created individual content for different slides in a report.
+                Render them together in markdown information.
+                Each slide should have their own pictures, just make it look nice.
+            """),
+        )
+        
+        prompt = f"Your team has created individual content for different slides in a report. Render them together in markdown information:\n{combined_report}\nEach slide should have their own pictures, just make it look nice. You can find some initial research results here:\n{ctx.data.get('initial_research_results')}, use them to replace any missing images."
+        res = await self.run_agent(ctx, res_agent, prompt)
+        
+        return StopEvent(result=res)
 
 
     async def run_sub_workflow(

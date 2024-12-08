@@ -12,6 +12,7 @@ export default function ChatSection() {
   const { backend } = useClientConfig();
   const handler = useChat({
     api: `${backend}/api/chat`,
+    experimental_throttle: 1000,
     onError: (error: unknown) => {
       if (!(error instanceof Error)) throw error;
       let errorMessage: string;
