@@ -28,9 +28,12 @@ The example provides one streaming API endpoint `/api/chat`.
 You can test the endpoint with the following curl request:
 
 ```
-curl --location 'localhost:8000/api/chat' \
---header 'Content-Type: application/json' \
---data '{ "messages": [{ "role": "user", "content": "Create a report comparing the finances of Apple and Tesla" }] }'
+curl --location 'localhost:8000/api/chat' --header 'Content-Type: application/json' --data '{ "messages": [{ "role": "user", "content": "Create a report comparing the finances of Apple and Tesla" }] }'
+```
+
+Windows version: 
+```
+curl --location "localhost:8000/api/chat" --header "Content-Type: application/json" --data "{ \"messages\": [{ \"role\": \"user\", \"content\": \"Create a report comparing the finances of Apple and Tesla\" }] }"
 ```
 
 You can start editing the API by modifying `app/api/routers/chat.py` or `app/workflows/financial_report.py`. The API auto-updates as you save the files.

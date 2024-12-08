@@ -272,4 +272,4 @@ def _find_free_port(start_port: int) -> int:
 
 def _is_frontend_included() -> bool:
     """Check if the app has frontend"""
-    return FRONTEND_DIR.exists()
+    return False
