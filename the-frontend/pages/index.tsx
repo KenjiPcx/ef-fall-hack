@@ -1,7 +1,7 @@
 import { exampleMessages } from '@/components/example_messages';
 import Messages from '@/components/messages';
 import { Textarea } from '@nextui-org/input';
-import { useChat } from 'ai/react'
+import { useChat } from 'ai/react';
 import { useEffect } from 'react';
 import { Button } from '@nextui-org/button';
 import SendIcon from '@/icons/sendIcon';
@@ -10,7 +10,8 @@ import SendIcon from '@/icons/sendIcon';
 export default function IndexPage() {
   const { messages, input, handleSubmit, handleInputChange, isLoading } = useChat({
     api: `http://localhost:8000/api/chat`,
-    initialMessages: []
+    initialMessages: [],
+    experimental_throttle: 200
   });
 
   const handleSubmitTextArea = (event: React.KeyboardEvent) => {
