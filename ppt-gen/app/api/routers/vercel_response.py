@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import traceback
 from typing import AsyncGenerator, Awaitable, List
 
 from aiostream import stream
@@ -41,8 +42,10 @@ class VercelStreamResponse(StreamingResponse):
                         is_stream_started = True
                         # Stream a blank message to start the stream
                         yield self.convert_text("")
+                    
+                    if not self.filter_output(output):
+                        yield output
 
-                    yield output
         except asyncio.CancelledError:
             logger.warning("Workflow has been cancelled!")
         except Exception as e:
@@ -55,6 +58,23 @@ class VercelStreamResponse(StreamingResponse):
         finally:
             await event_handler.cancel_run()
             logger.info("The stream has been stopped!")
+
+    def filter_output(self, output: str) -> bool:
+        try:
+            dict_output = json.loads('{"' + output[0] + '"' + output[1:] + '}')
+            restricted_agents = {'Analyst', 'Researcher', 'Research Manager'} 
+            if '8' in dict_output:
+                output_data = dict_output['8'][0]['data']
+                if output_data['agent'] in restricted_agents and output_data['text'] != 'Finished task':
+                    return True
+        except Exception as e:
+            traceback.print_exc(e)
+            return False
+        
+        return False
+        
+
+
 
     def _create_stream(
         self,

@@ -59,7 +59,7 @@ def create_competitor_analyzer(chat_history: List[ChatMessage]):
         - Avoid assumptions or unsupported claims
         
         ### Output
-        You must output the full complete report in markdown format
+        You must output the full complete report.
     """)
     
     configured_tools = ToolFactory.from_env(map_result=True)
